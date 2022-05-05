@@ -41,7 +41,6 @@ namespace RepositoryLayer.Services
                 throw ex;
             }
         }
-
         public string LoginUser(string email, string password)
         {
             try
