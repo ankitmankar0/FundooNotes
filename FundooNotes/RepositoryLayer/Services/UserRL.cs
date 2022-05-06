@@ -1,4 +1,5 @@
 ﻿using CommonLayer;
+using Experimental.System.Messaging;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using RepositoryLayer.FundooContext;
@@ -31,7 +32,7 @@ namespace RepositoryLayer.Services
                 user1.lastName = user.lastName;
                 user1.email = user.email;
                 user1.password = user.password;
-                user1.registeredDate = DateTime.Now;              
+                user1.registeredDate = DateTime.Now;
                 fundooDBContext.Add(user1);
                 fundooDBContext.SaveChanges();
 
@@ -74,6 +75,102 @@ namespace RepositoryLayer.Services
 
                 SigningCredentials =
                 new SigningCredentials(
+                    new SymmetricSecurityKey(tokenKey),
+                    SecurityAlgorithms.HmacSha256Signature)
+            };
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            return tokenHandler.WriteToken(token);
+        }
+
+        public bool ForgotPassword(string email)
+        {
+            try
+            {
+                var userdata = fundooDBContext.Users.FirstOrDefault(u => u.email == email);
+                if (userdata == null)
+                {
+                    return false;
+                }
+
+
+                MessageQueue queue;
+                // Add Message to Queue
+
+                if (MessageQueue.Exists(@".\Private$\FundooQueue"))
+                {
+                    queue = new MessageQueue(@".\Private$\FundooQueue");
+                }
+                else
+                {
+                    queue = MessageQueue.Create(@".\Private$\FundooQueue");
+                }
+
+                Message MyMessage = new Message();
+                MyMessage.Formatter = new BinaryMessageFormatter();
+                MyMessage.Body = GetJWTToken(email, userdata.userID);
+                MyMessage.Label = "Forgot Password Email";
+                queue.Send(MyMessage);
+
+                Message msg = queue.Receive();
+                msg.Formatter = new BinaryMessageFormatter();
+                EmailService.SendMail(email, msg.Body.ToString());
+                queue.ReceiveCompleted += new ReceiveCompletedEventHandler(msmqQueue_ReciveCompleted);
+
+                queue.BeginReceive();
+                queue.Close();
+                return true;
+
+            }
+            catch (Exception ex)
+            {
+
+                throw ex;
+            }
+        }
+
+        private void msmqQueue_ReciveCompleted(object sender, ReceiveCompletedEventArgs e)
+        {
+            try
+            {
+                {
+                    MessageQueue queue = (MessageQueue)sender;
+                    Message msg = queue.EndReceive(e.AsyncResult);
+                    EmailService.SendMail(e.Message.ToString(), GenerateToken(e.Message.ToString()));
+                    queue.BeginReceive();
+                }
+
+            }
+            catch (MessageQueueException ex)
+            {
+
+                if (ex.MessageQueueErrorCode ==
+                   MessageQueueErrorCode.AccessDenied)
+                {
+                    Console.WriteLine("Access is denied. " +
+                        "Queue might be a system queue.");
+                }
+                // Handle other sources of MessageQueueException.
+            }
+        }
+
+        private string GenerateToken(string email)
+        {
+            if (email == null)
+            {
+                return null;
+            }
+
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var tokenKey = Encoding.ASCII.GetBytes("THIS_IS_MY_KEY_TO_GENERATE_TOKEN");
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(new Claim[]
+                {
+                    new Claim("Email", email)
+                }),
+                Expires = DateTime.UtcNow.AddHours(1),
+                SigningCredentials = 
+                new SigningCredentials( 
                     new SymmetricSecurityKey(tokenKey),
                     SecurityAlgorithms.HmacSha256Signature)
             };
