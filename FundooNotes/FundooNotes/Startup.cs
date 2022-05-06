@@ -98,7 +98,7 @@ namespace FundooNotes
 
             app.UseAuthorization();
 
-            app.UseAuthorization();
+            app.UseAuthentication();
 
             app.UseSwagger();
 
