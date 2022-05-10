@@ -51,10 +51,10 @@ namespace FundooNotes.Controllers
                 {
                     return this.BadRequest(new { success = false, message = $"Email And PassWord Is Invalid" });
                 }
-                var result = this.userBL.LoginUser(email, password);
+                var Check = this.userBL.LoginUser(email, password);
 
 
-                return this.Ok(new { success = true, message = $"Login Successfull {result}" });
+                return this.Ok(new { success = true, message = $"Login Successfull {Check}" });
 
             }
             catch (Exception ex)
@@ -89,22 +89,22 @@ namespace FundooNotes.Controllers
             }
         }
 
-        //[Authorize]
+        [Authorize]
         [HttpPut("ResetPassword")]
-        public IActionResult ResetPassword(ResetPassword resetPassword)
+        public ActionResult ResetPassword(ResetPassword resetPassword)
         {
             try
             {
-    
-                string email = User.FindFirst(ClaimTypes.Email).Value.ToString();                    
-                bool res = userBL.ResetPassword(resetPassword, email);
+
+                string email = User.FindFirst(ClaimTypes.Email).Value.ToString();                 
+                bool res = this.userBL.ResetPassword(resetPassword, email);
 
                 if (res == false)
                 {
-                    return this.BadRequest(new { success = false, message = "enter valid password" });
+                    return BadRequest(new { success = false, message = "enter valid password" });
 
                 }
-                return this.Ok(new { success = true, message = "reset password set successfully" });
+                return this.Ok(new { success = true, message = "reset password set successfully." });
 
             }
             catch (Exception ex)

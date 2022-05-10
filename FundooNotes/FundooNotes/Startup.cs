@@ -36,9 +36,13 @@ namespace FundooNotes
         public void ConfigureServices(IServiceCollection services)  //For injecting any services we use IServiceCollection
         {
             services.AddControllers();   // Services For WebApi
+            services.AddDbContext<FundooDBContext>(opts => opts.UseSqlServer(Configuration["ConnectionStrings:FundooDB"]));
             services.AddTransient<IUserBL, UserBL>();
             services.AddTransient<IUserRL, UserRL>();
-            services.AddDbContext<FundooDBContext>(opts => opts.UseSqlServer(Configuration["ConnectionStrings:FundooDB"]));
+
+            services.AddTransient<INoteBL, NoteBL>();
+            services.AddTransient<INoteRL, NoteRL>();
+
 
 
             //Adding Swagger in Services Collection
@@ -93,6 +97,17 @@ namespace FundooNotes
             // IApplicationBuilder provides the mechanisms to configure an application's request pipeline.
             //IWebHostEnvironment  provide info about web hosting env an application runnning in
         {
+
+            // Swagger middleware to to handle requests and responses and serve swagger-ui (HTML, JS, CSS, etc.)
+            app.UseSwagger();
+
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "FundooNotes");
+            });
+
+            app.UseAuthentication();
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -103,17 +118,7 @@ namespace FundooNotes
             app.UseRouting();   //enabling routing
 
             app.UseAuthorization();
-
-            app.UseAuthentication();
-
-            app.UseSwagger();
-
-            // Swagger middleware to to handle requests and responses and serve swagger-ui (HTML, JS, CSS, etc.)
-            app.UseSwaggerUI(c =>
-            {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "FundooNotes");
-            });          
-
+            
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();

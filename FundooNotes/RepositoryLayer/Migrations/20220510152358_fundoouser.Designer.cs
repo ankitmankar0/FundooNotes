@@ -10,8 +10,8 @@ using RepositoryLayer.FundooContext;
 namespace RepositoryLayer.Migrations
 {
     [DbContext(typeof(FundooDBContext))]
-    [Migration("20220510064923_FundooNotes")]
-    partial class FundooNotes
+    [Migration("20220510152358_fundoouser")]
+    partial class fundoouser
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -58,12 +58,12 @@ namespace RepositoryLayer.Migrations
                     b.Property<string>("Title")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("UserID")
+                    b.Property<int>("userID")
                         .HasColumnType("int");
 
                     b.HasKey("NoteId");
 
-                    b.HasIndex("UserID");
+                    b.HasIndex("userID");
 
                     b.ToTable("Notes");
                 });
@@ -103,7 +103,7 @@ namespace RepositoryLayer.Migrations
                 {
                     b.HasOne("RepositoryLayer.Entity.User", "User")
                         .WithMany()
-                        .HasForeignKey("UserID")
+                        .HasForeignKey("userID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
