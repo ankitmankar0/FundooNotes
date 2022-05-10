@@ -2,6 +2,7 @@
 using Experimental.System.Messaging;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using RepositoryLayer.Entity;
 using RepositoryLayer.FundooContext;
 using RepositoryLayer.Interface;
 using System;
@@ -15,19 +16,24 @@ namespace RepositoryLayer.Services
 {
     public class UserRL : IUserRL
     {
+        //instance of  FundooContext Class
         FundooDBContext fundooDBContext;
+
+        //Constructor
         public IConfiguration configuration { get; }
         public UserRL(FundooDBContext fundooDBContext, IConfiguration configuration)
         {
             this.fundooDBContext = fundooDBContext;
             this.configuration = configuration;
         }
+
+        //Method to register User Details.
         public void AddUser(UserPostModel user)
         {
             try
             {
-                Entity.User user1 = new Entity.User();
-                user1.userID = new Entity.User().userID;
+                User user1 = new User();
+                user1.userID = new User().userID;
                 user1.firstName = user.firstName;
                 user1.lastName = user.lastName;
                 user1.email = user.email;
@@ -42,17 +48,70 @@ namespace RepositoryLayer.Services
                 throw ex;
             }
         }
+
+        //public string EncryptPassword(string password)
+        //{
+        //    try
+        //    {
+        //        if (string.IsNullOrEmpty(password))
+        //        {
+        //            return null;
+        //        }
+        //        else
+        //        {
+        //            byte[] b = Encoding.ASCII.GetBytes(password);
+        //            string encrypted = Convert.ToBase64String(b);
+        //            return encrypted;
+        //        }
+        //    }
+        //    catch (Exception)
+        //    {
+
+        //        throw;
+        //    }
+        //}
+
+        //public static string DecryptedPassword(string encryptedPassword)
+        //{
+        //    byte[] b;
+        //    string decrypted;
+        //    try
+        //    {
+        //        if (string.IsNullOrEmpty(encryptedPassword))
+        //        {
+        //            return null;
+        //        }
+        //        else
+        //        {
+        //            b = Convert.FromBase64String(encryptedPassword);
+        //            decrypted = Encoding.ASCII.GetString(b);
+        //            return decrypted;
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+
+        //        throw ex;
+        //    }
+        //}
+
+
+
+        //Validating Email And Password
         public string LoginUser(string email, string password)
         {
             try
             {
+                //Linq query matches given input in database and returns that entry from the database.
                 var result = fundooDBContext.Users.Where(u => u.email == email && u.password == password).FirstOrDefault();
-                if (result == null)
+                if (result != null)
                 {
                     return null;
                 }
+
+                //Calling Jwt Token Creation method and returning token.
                 return GetJWTToken(email, result.userID);
-                // string password = password;
+
             }
             catch (Exception ex)
             {
@@ -60,6 +119,8 @@ namespace RepositoryLayer.Services
                 throw ex;
             }
         }
+
+        //Implementing Jwt Token For Login using Email and Id
         private static string GetJWTToken(string email, int userID)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
@@ -82,6 +143,7 @@ namespace RepositoryLayer.Services
             return tokenHandler.WriteToken(token);
         }
 
+        // User ForgotPasssword
         public bool ForgotPassword(string email)
         {
             try
@@ -169,13 +231,32 @@ namespace RepositoryLayer.Services
                     new Claim("Email", email)
                 }),
                 Expires = DateTime.UtcNow.AddHours(1),
-                SigningCredentials = 
-                new SigningCredentials( 
+                SigningCredentials =
+                new SigningCredentials(
                     new SymmetricSecurityKey(tokenKey),
                     SecurityAlgorithms.HmacSha256Signature)
             };
             var token = tokenHandler.CreateToken(tokenDescriptor);
             return tokenHandler.WriteToken(token);
+        }
+
+        public bool ResetPassword(ResetPassword resetPassword, string email)
+        {
+            try
+            {
+                if (resetPassword.NewPassword.Equals(resetPassword.ConfirmPassword))
+                {
+                    var user = fundooDBContext.Users.Where(x => x.email == resetPassword.NewPassword).FirstOrDefault();
+                    fundooDBContext.SaveChanges();
+                    return true;
+                }
+                return false;
+            }
+            catch (Exception ex)
+            {
+
+                throw ex;
+            }
         }
     }
 }
