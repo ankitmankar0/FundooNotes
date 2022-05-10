@@ -5,6 +5,7 @@ using RepositoryLayer.FundooContext;
 using RepositoryLayer.Interface;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -26,10 +27,16 @@ namespace RepositoryLayer.Services
         {
             try
             {
+                //var user = fundooDBContext.Users.FirstOrDefault(u => u.userID == userId);
                 Note note = new Note();
+
+                note.NoteId = new Note().NoteId;
+                note.userID = userId;
+
                 note.Title = notePostModel.Title;
                 note.Description = notePostModel.Description;
                 note.BgColour = notePostModel.BgColour;
+
                 note.IsPin = false;
                 note.IsReminder = false;
                 note.IsArchieve = false;
@@ -45,6 +52,22 @@ namespace RepositoryLayer.Services
             {
 
                 throw;
+            }
+        }
+
+        public bool DeleteNote(int noteId)
+        {
+            Note note = fundooDBContext.Notes.FirstOrDefault(e => e.NoteId == noteId);
+
+            if (note != null)
+            {
+                fundooDBContext.Notes.Remove(note);
+                fundooDBContext.SaveChanges();
+                return true;
+            }
+            else
+            {
+                return false;
             }
         }
     }
