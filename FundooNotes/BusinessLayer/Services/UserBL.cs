@@ -8,6 +8,7 @@ using System.Text;
 
 namespace BusinessLayer.Services
 {
+    //Service Class of Business Layer
     public class UserBL : IUserBL
     {
         public UserBL(IUserRL userRL)
@@ -16,6 +17,8 @@ namespace BusinessLayer.Services
         }
 
         IUserRL userRL;
+
+        //Method to return UserRegistration obj to Repo Layer User.
         public void AddUser(UserPostModel user)
         {
             try
@@ -29,6 +32,7 @@ namespace BusinessLayer.Services
             }
         }
 
+        //User Login
         public string LoginUser(string email, string password)
         {
             try
@@ -41,6 +45,7 @@ namespace BusinessLayer.Services
             }
         }
 
+        // User ForgotPasssword
         public bool ForgotPassword(string email)
         {
             try
@@ -49,6 +54,18 @@ namespace BusinessLayer.Services
             }
             catch (Exception ex)
             {
+                throw ex;
+            }
+        }
+        public bool ResetPassword(ResetPassword resetPassword, string email)
+        {
+            try
+            {
+                return this.userRL.ResetPassword(resetPassword, email);
+            }
+            catch (Exception ex)
+            {
+
                 throw ex;
             }
         }

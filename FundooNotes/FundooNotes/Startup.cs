@@ -33,13 +33,15 @@ namespace FundooNotes
         public IConfiguration Configuration { get; }
 
         //  Use this method to add services to the container. This method gets called by the runtime.
-        public void ConfigureServices(IServiceCollection services)
+        public void ConfigureServices(IServiceCollection services)  //For injecting any services we use IServiceCollection
         {
-            services.AddControllers();
+            services.AddControllers();   // Services For WebApi
             services.AddTransient<IUserBL, UserBL>();
             services.AddTransient<IUserRL, UserRL>();
             services.AddDbContext<FundooDBContext>(opts => opts.UseSqlServer(Configuration["ConnectionStrings:FundooDB"]));
 
+
+            //Adding Swagger in Services Collection
             services.AddSwaggerGen(setup =>
             {
                 // Include 'SecurityScheme' to use JWT Authentication
@@ -76,9 +78,10 @@ namespace FundooNotes
                 x.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuerSigningKey = true,
+
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes("THIS_IS_MY_KEY_TO_GENERATE_TOKEN")),
                     ValidateIssuer = false,
-                    ValidateAudience = false
+                    ValidateAudience = false,
                 };
             });
 
@@ -86,6 +89,9 @@ namespace FundooNotes
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+
+            // IApplicationBuilder provides the mechanisms to configure an application's request pipeline.
+            //IWebHostEnvironment  provide info about web hosting env an application runnning in
         {
             if (env.IsDevelopment())
             {
@@ -94,7 +100,7 @@ namespace FundooNotes
 
             app.UseHttpsRedirection();
 
-            app.UseRouting();
+            app.UseRouting();   //enabling routing
 
             app.UseAuthorization();
 
@@ -102,11 +108,11 @@ namespace FundooNotes
 
             app.UseSwagger();
 
-            // Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.)
+            // Swagger middleware to to handle requests and responses and serve swagger-ui (HTML, JS, CSS, etc.)
             app.UseSwaggerUI(c =>
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "FundooNotes");
-            });
+            });          
 
             app.UseEndpoints(endpoints =>
             {
