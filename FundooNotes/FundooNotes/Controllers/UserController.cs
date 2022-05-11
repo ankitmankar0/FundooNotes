@@ -113,5 +113,19 @@ namespace FundooNotes.Controllers
             }
         }
 
+        [HttpGet("getallusers")]
+        public ActionResult GetAllUsers()
+        {
+            try
+            {
+                var result = userBL.GetAllUsers();
+                return this.Ok(new { success = true, message = $"Below are the User data", data = result });
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+        }
+
     }
 }

@@ -1,5 +1,6 @@
 ﻿using CommonLayer;
 using Experimental.System.Messaging;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using RepositoryLayer.Entity;
@@ -33,12 +34,13 @@ namespace RepositoryLayer.Services
             try
             {
                 User user1 = new User();
-
+                
                 user1.userID = new User().userID;
                 user1.firstName = user.firstName;
                 user1.lastName = user.lastName;
                 user1.email = user.email;
-                user1.password = EncryptPassword(user.password);
+                
+                user1.password = StringCipher.Encrypt(user.password);
                 user1.registeredDate = DateTime.Now;
                 fundooDBContext.Add(user1);
                 fundooDBContext.SaveChanges();
@@ -50,51 +52,51 @@ namespace RepositoryLayer.Services
             }
         }
 
-        public string EncryptPassword(string password)
-        {
-            try
-            {
-                if (string.IsNullOrEmpty(password))
-                {
-                    return null;
-                }
-                else
-                {
-                    byte[] b = Encoding.ASCII.GetBytes(password);
-                    string encrypted = Convert.ToBase64String(b);
-                    return encrypted;
-                }
-            }
-            catch (Exception)
-            {
+        //public string EncryptPassword(string password)
+        //{
+        //    try
+        //    {
+        //        if (string.IsNullOrEmpty(password))
+        //        {
+        //            return null;
+        //        }
+        //        else
+        //        {
+        //            byte[] b = Encoding.ASCII.GetBytes(password);
+        //            string encrypted = Convert.ToBase64String(b);
+        //            return encrypted;
+        //        }
+        //    }
+        //    catch (Exception)
+        //    {
 
-                throw;
-            }
-        }
+        //        throw;
+        //    }
+        //}
 
-        public static string DecryptedPassword(string encryptedPassword)
-        {
-            byte[] b;
-            string decrypted;
-            try
-            {
-                if (string.IsNullOrEmpty(encryptedPassword))
-                {
-                    return null;
-                }
-                else
-                {
-                    b = Convert.FromBase64String(encryptedPassword);
-                    decrypted = Encoding.ASCII.GetString(b);
-                    return decrypted;
-                }
-            }
-            catch (Exception ex)
-            {
+        //public static string DecryptedPassword(string encryptedPassword)
+        //{
+        //    byte[] b;
+        //    string decrypted;
+        //    try
+        //    {
+        //        if (string.IsNullOrEmpty(encryptedPassword))
+        //        {
+        //            return null;
+        //        }
+        //        else
+        //        {
+        //            b = Convert.FromBase64String(encryptedPassword);
+        //            decrypted = Encoding.ASCII.GetString(b);
+        //            return decrypted;
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
 
-                throw ex;
-            }
-        }
+        //        throw ex;
+        //    }
+        //}
 
 
 
@@ -109,7 +111,7 @@ namespace RepositoryLayer.Services
                 {
                     return null;
                 }
-
+               
                 //Calling Jwt Token Creation method and returning token.
                 return GetJWTToken(email, result.userID);
 
@@ -124,6 +126,7 @@ namespace RepositoryLayer.Services
         //Implementing Jwt Token For Login using Email and Id
         private static string GetJWTToken(string email, int userID)
         {
+
             var tokenHandler = new JwtSecurityTokenHandler();
             var tokenKey = Encoding.ASCII.GetBytes("THIS_IS_MY_KEY_TO_GENERATE_TOKEN");
             var tokenDescriptor = new SecurityTokenDescriptor
@@ -246,8 +249,8 @@ namespace RepositoryLayer.Services
                 var user = fundooDBContext.Users.FirstOrDefault(u => u.email == email);
                 if (resetPassword.NewPassword.Equals(resetPassword.ConfirmPassword))
                 {
-                    //string encryptedPassword = StringCipher.Encrypt(password);
-                    user.password = EncryptPassword(resetPassword.NewPassword);
+                    string encryptedPassword = StringCipher.Encrypt(resetPassword.NewPassword);
+                    //user.password = EncryptPassword(resetPassword.NewPassword);
                     fundooDBContext.SaveChanges();
                     return true;
                 }
@@ -256,6 +259,20 @@ namespace RepositoryLayer.Services
             catch (Exception ex)
             {
 
+                throw ex;
+            }
+        }
+
+        public List<User> GetAllUsers()
+        {
+            try
+            {
+                   //string decryptedString = StringCipher.Decrypt(password);
+                var result = fundooDBContext.Users.ToList();
+                return result;
+            }
+            catch (Exception ex)
+            {
                 throw ex;
             }
         }

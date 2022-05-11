@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using RepositoryLayer.Entity;
 using RepositoryLayer.FundooContext;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -24,8 +25,8 @@ namespace FundooNotes.Controllers
 
 
         [Authorize]
-        [HttpPost]
-        public async Task<ActionResult> AddNote(NotePostModel notePostModel)
+        [HttpPost("AddNote")]
+        public async Task<IActionResult> AddNote(NotePostModel notePostModel)
         {
             try
             {
@@ -133,5 +134,69 @@ namespace FundooNotes.Controllers
             }
         }
 
+        [Authorize]
+        [HttpPut("IsPinned/{noteId}")]
+        public async Task<ActionResult> IsPinned(int noteId)
+        {
+            try
+            {
+                var userid = User.Claims.FirstOrDefault(x => x.Type.ToString().Equals("userID", StringComparison.InvariantCultureIgnoreCase));
+                int userId = Int32.Parse(userid.Value);
+
+                var note = fundooDBContext.Notes.FirstOrDefault(e => e.userID == userId && e.NoteId == noteId);
+                if (note == null)
+                {
+                    return this.BadRequest(new { success = false, message = "Failed to pin note or Id does not exists" });                   
+                }
+                await this.noteBL.PinNote(userId, noteId);
+                return this.Ok(new { success = true, message = "Note pinned successfully!!!" });
+
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+        [Authorize]
+        [HttpPut("IsTrash/{noteId}")]
+        public async Task<ActionResult> IsTrash(int noteId)
+        {
+            try
+            {
+                var userid = User.Claims.FirstOrDefault(x => x.Type.ToString().Equals("userID", StringComparison.InvariantCultureIgnoreCase));
+                int userId = Int32.Parse(userid.Value);
+
+                var note = fundooDBContext.Notes.FirstOrDefault(e => e.userID == userId && e.NoteId == noteId);
+                if (note == null)
+                {
+                    return this.BadRequest(new { success = false, message = "Failed to Trash note or Id does not exists" });
+                }
+                await this.noteBL.TrashNote(userId, noteId);
+                return this.Ok(new { success = true, message = "Note Trashed successfully!!!" });
+
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        [Authorize]
+        [HttpGet("GetAllNotes")]
+        public async Task<ActionResult> GetAllNotes()
+        {
+            try
+            {
+                var userid = User.Claims.FirstOrDefault(x => x.Type.ToString().Equals("userID", StringComparison.InvariantCultureIgnoreCase));
+                int userId = Int32.Parse(userid.Value);
+                List<Note> result = new List<Note>();
+                result = await this.noteBL.GetAllNote(userId);
+                return this.Ok(new { success = true, message = $"Below are all notes", data = result });
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
     }
 }
