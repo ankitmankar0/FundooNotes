@@ -154,8 +154,6 @@ namespace RepositoryLayer.Services
                 {
                     return false;
                 }
-
-
                 MessageQueue queue;
                 // Add Message to Queue
 

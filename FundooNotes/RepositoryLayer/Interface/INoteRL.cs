@@ -1,4 +1,5 @@
 ﻿using CommonLayer;
+using RepositoryLayer.Entity;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -9,7 +10,12 @@ namespace RepositoryLayer.Interface
     public interface INoteRL
     {
         Task AddNote(int userId, NotePostModel notePostModel);
+        Task<Note> UpdateNote(int userId, int noteId, NoteUpdateModel noteUpdateModel);
+        Task DeleteNote(int noteId, int userId);
 
-        bool DeleteNote(int noteId);
+        Task ChangeColour(int userId, int noteId, string colour);
+
+        Task ArchiveNote(int userId, int noteId);
+       
     }
 }
