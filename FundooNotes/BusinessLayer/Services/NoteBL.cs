@@ -1,5 +1,6 @@
 ﻿using BusinessLayer.Interfaces;
 using CommonLayer;
+using RepositoryLayer.Entity;
 using RepositoryLayer.Interface;
 using System;
 using System.Collections.Generic;
@@ -28,20 +29,57 @@ namespace BusinessLayer.Services
             }
         }
 
-        public bool DeleteNote(int noteId)
+        public async Task<Note> UpdateNote(int userId, int noteId, NoteUpdateModel noteUpdateModel)
         {
             try
             {
-                if (noteRL.DeleteNote(noteId))
-                    return true;
-                else
-                    return false;
+                return await this.noteRL.UpdateNote(userId, noteId, noteUpdateModel);
             }
-            catch (Exception e)
+            catch (Exception)
             {
 
-                throw e;
+                throw;
             }
         }
+
+        public Task DeleteNote(int noteId, int userId)
+        {
+            try
+            {
+                return this.noteRL.DeleteNote(noteId, userId);
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+        public async Task ArchiveNote(int userId, int noteId)
+        {
+            try
+            {
+                await this.noteRL.ArchiveNote(userId, noteId);
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        } 
+
+        public async Task ChangeColour(int userId, int noteId, string colour)
+        {
+            try
+            {
+                await this.noteRL.ChangeColour(userId, noteId, colour);
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+ 
     }
 }

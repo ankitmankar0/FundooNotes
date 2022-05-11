@@ -1,4 +1,5 @@
 ﻿using CommonLayer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using RepositoryLayer.Entity;
 using RepositoryLayer.FundooContext;
@@ -30,7 +31,7 @@ namespace RepositoryLayer.Services
                 //var user = fundooDBContext.Users.FirstOrDefault(u => u.userID == userId);
                 Note note = new Note();
 
-                note.NoteId = new Note().NoteId;
+                //note.NoteId = new Note().NoteId;
                 note.userID = userId;
 
                 note.Title = notePostModel.Title;
@@ -55,20 +56,99 @@ namespace RepositoryLayer.Services
             }
         }
 
-        public bool DeleteNote(int noteId)
+        public async Task<Note> UpdateNote(int userId, int noteId, NoteUpdateModel noteUpdateModel)
         {
-            Note note = fundooDBContext.Notes.FirstOrDefault(e => e.NoteId == noteId);
+            try
+            {
+                var note = fundooDBContext.Notes.FirstOrDefault(e => e.userID == userId && e.NoteId == noteId);
+                if (note != null)
+                {
+                    note.Title = noteUpdateModel.Title;
+                    note.Description = noteUpdateModel.Description;
+                    note.IsArchieve = noteUpdateModel.IsArchieve;
+                    note.BgColour = noteUpdateModel.BgColour;
+                    note.IsPin = noteUpdateModel.IsPin;
+                    note.IsReminder = noteUpdateModel.IsReminder;
+                    note.IsTrash = noteUpdateModel.IsTrash;
 
-            if (note != null)
-            {
-                fundooDBContext.Notes.Remove(note);
-                fundooDBContext.SaveChanges();
-                return true;
+                    await fundooDBContext.SaveChangesAsync();
+
+                }
+                return await fundooDBContext.Notes
+                .Where(u => u.userID == u.userID && u.NoteId == noteId)
+                .Include(u => u.User)
+                .FirstOrDefaultAsync();
             }
-            else
+            catch (Exception)
             {
-                return false;
+
+                throw;
             }
         }
+
+
+        public async Task DeleteNote(int noteId, int userId)
+        {
+            try
+            {
+                var note = fundooDBContext.Notes.FirstOrDefault(u => u.NoteId == noteId && u.userID == userId);
+                fundooDBContext.Notes.Remove(note);
+                await fundooDBContext.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+
+                throw ex;
+            }
+        }
+
+        public async Task ChangeColour(int userId, int noteId, string colour)
+        {
+            try
+            {
+                var note = fundooDBContext.Notes.FirstOrDefault(e => e.userID == userId && e.NoteId == noteId);
+                if (note != null)
+                {
+                    note.BgColour = colour;
+                    await fundooDBContext.SaveChangesAsync();
+                }
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+        public async Task ArchiveNote(int userId, int noteId)
+        {
+            try
+            {
+                var note = fundooDBContext.Notes.FirstOrDefault(e => e.userID == userId && e.NoteId == noteId);
+                if (note != null)
+                {
+                   if (note.IsArchieve == true)
+                    {
+                        note.IsArchieve = false;
+                    }
+
+                   if (note.IsArchieve == false)
+                    {
+                        note.IsArchieve = true;
+                    }
+                }
+
+                await fundooDBContext.SaveChangesAsync();
+                
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+        
+
     }
 }
