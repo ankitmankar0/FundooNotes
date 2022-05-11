@@ -31,7 +31,6 @@ namespace RepositoryLayer.Services
                 //var user = fundooDBContext.Users.FirstOrDefault(u => u.userID == userId);
                 Note note = new Note();
 
-                //note.NoteId = new Note().NoteId;
                 note.userID = userId;
 
                 note.Title = notePostModel.Title;
@@ -127,19 +126,19 @@ namespace RepositoryLayer.Services
                 var note = fundooDBContext.Notes.FirstOrDefault(e => e.userID == userId && e.NoteId == noteId);
                 if (note != null)
                 {
-                   if (note.IsArchieve == true)
+                    if (note.IsArchieve == true)
                     {
                         note.IsArchieve = false;
                     }
 
-                   if (note.IsArchieve == false)
+                    if (note.IsArchieve == false)
                     {
                         note.IsArchieve = true;
                     }
                 }
 
                 await fundooDBContext.SaveChangesAsync();
-                
+
             }
             catch (Exception)
             {
@@ -148,7 +147,68 @@ namespace RepositoryLayer.Services
             }
         }
 
-        
+        public async Task<Note> PinNote(int userId, int noteId)
+        {
+            try
+            {
+                var note = fundooDBContext.Notes.FirstOrDefault(e => e.userID == userId && e.NoteId == noteId);
+                if (note != null)
+                {
+                    if (note.IsPin == true)
+                    {
+                        note.IsPin = false;
+                    }
 
+                    if (note.IsPin == false)
+                    {
+                        note.IsPin = true;
+                    }
+                }
+                await fundooDBContext.SaveChangesAsync();
+                return await fundooDBContext.Notes.Where(a => a.NoteId == noteId).FirstOrDefaultAsync();
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+        }
+
+        public async Task<Note> TrashNote(int userId, int noteId)
+        {
+            try
+            {
+                var note = fundooDBContext.Notes.FirstOrDefault(e => e.userID == userId && e.NoteId == noteId);
+                if (note != null)
+                {
+                    if (note.IsTrash == true)
+                    {
+                        note.IsTrash = false;
+                    }
+
+                    if (note.IsTrash == false)
+                    {
+                        note.IsTrash = true;
+                    }
+                }
+                await fundooDBContext.SaveChangesAsync();
+                return await fundooDBContext.Notes.Where(a => a.NoteId == noteId).FirstOrDefaultAsync();
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+        }
+
+        public async Task<List<Note>> GetAllNote(int userId)
+        {
+            try
+            {
+                return await fundooDBContext.Notes.Where(u => u.userID == userId).Include(u => u.User).ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
     }
 }

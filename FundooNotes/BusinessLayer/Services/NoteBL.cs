@@ -80,6 +80,41 @@ namespace BusinessLayer.Services
                 throw;
             }
         }
- 
+
+        public Task<Note> PinNote(int userId, int noteId )
+        {
+            try
+            {
+                return this.noteRL.PinNote(userId, noteId);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public Task<Note> TrashNote(int userId, int noteId)
+        {
+            try
+            {
+                return this.noteRL.TrashNote(userId, noteId);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public Task<List<Note>> GetAllNote(int userId)
+        {
+            try
+            {
+                return this.noteRL.GetAllNote(userId);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
     }
 }

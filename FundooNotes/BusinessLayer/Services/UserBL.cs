@@ -1,5 +1,6 @@
 ﻿using BusinessLayer.Interfaces;
 using CommonLayer;
+using RepositoryLayer.Entity;
 using RepositoryLayer.FundooContext;
 using RepositoryLayer.Interface;
 using System;
@@ -67,6 +68,19 @@ namespace BusinessLayer.Services
             {
 
                 throw ex;
+            }
+        }
+
+        public List<User> GetAllUsers()
+        {
+            try
+            {
+                return userRL.GetAllUsers();
+
+            }
+            catch (Exception e)
+            {
+                throw e;
             }
         }
     }
