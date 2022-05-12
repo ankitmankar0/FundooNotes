@@ -43,6 +43,9 @@ namespace FundooNotes
             services.AddTransient<INoteBL, NoteBL>();
             services.AddTransient<INoteRL, NoteRL>();
 
+            services.AddTransient<ILabelBL, LabelBL>();
+            services.AddTransient<ILabelRL, LabelRL>();
+
 
 
             //Adding Swagger in Services Collection

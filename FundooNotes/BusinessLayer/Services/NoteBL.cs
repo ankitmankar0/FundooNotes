@@ -42,7 +42,7 @@ namespace BusinessLayer.Services
             }
         }
 
-        public Task DeleteNote(int noteId, int userId)
+        public  Task DeleteNote(int noteId, int userId)
         {
             try
             {
@@ -81,11 +81,11 @@ namespace BusinessLayer.Services
             }
         }
 
-        public Task<Note> PinNote(int userId, int noteId )
+        public async Task<Note> PinNote(int userId, int noteId )
         {
             try
             {
-                return this.noteRL.PinNote(userId, noteId);
+                return await this.noteRL.PinNote(userId, noteId);
             }
             catch (Exception ex)
             {
@@ -93,11 +93,11 @@ namespace BusinessLayer.Services
             }
         }
 
-        public Task<Note> TrashNote(int userId, int noteId)
+        public async Task<Note> TrashNote(int userId, int noteId)
         {
             try
             {
-                return this.noteRL.TrashNote(userId, noteId);
+                return await this.noteRL.TrashNote(userId, noteId);
             }
             catch (Exception ex)
             {
@@ -105,11 +105,23 @@ namespace BusinessLayer.Services
             }
         }
 
-        public Task<List<Note>> GetAllNote(int userId)
+        public async Task<List<Note>> GetAllNote(int userId)
         {
             try
             {
-                return this.noteRL.GetAllNote(userId);
+                return await this.noteRL.GetAllNote(userId);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public async Task ReminderNote(int userId, int noteId, DateTime ReminderDate)
+        {
+            try
+            {
+                 await this.noteRL.ReminderNote(userId, noteId, ReminderDate);
             }
             catch (Exception ex)
             {

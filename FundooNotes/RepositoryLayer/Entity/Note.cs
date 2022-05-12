@@ -30,5 +30,7 @@ namespace RepositoryLayer.Entity
         [ForeignKey("User")]
         public int userID { get; set; }
         public virtual User User { get; set; }
+
+        public virtual Label Label { get; set; }
     }
 }

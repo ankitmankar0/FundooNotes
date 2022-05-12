@@ -210,5 +210,26 @@ namespace RepositoryLayer.Services
                 throw ex;
             }
         }
+
+        public async Task ReminderNote(int userId, int noteId, DateTime ReminderDate)
+        {
+            try
+            {
+                var note = fundooDBContext.Notes.FirstOrDefault(e => e.userID == userId && e.NoteId == noteId);
+                if (note != null)
+                {
+                    if(note.IsReminder == true)
+                    {
+                        note.ReminderDate = ReminderDate;
+                    }
+                }
+                await fundooDBContext.SaveChangesAsync();
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
     }
 }

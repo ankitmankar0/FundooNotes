@@ -22,6 +22,7 @@ namespace RepositoryLayer.Services
 
         //Constructor
         public IConfiguration configuration { get; }
+  
         public UserRL(FundooDBContext fundooDBContext, IConfiguration configuration)
         {
             this.fundooDBContext = fundooDBContext;
@@ -38,9 +39,8 @@ namespace RepositoryLayer.Services
                 user1.userID = new User().userID;
                 user1.firstName = user.firstName;
                 user1.lastName = user.lastName;
-                user1.email = user.email;
-                
-                user1.password = StringCipher.Encrypt(user.password);
+                user1.email = user.email;                
+                user1.password = EncryptPassword(user.password);
                 user1.registeredDate = DateTime.Now;
                 fundooDBContext.Add(user1);
                 fundooDBContext.SaveChanges();
@@ -52,27 +52,27 @@ namespace RepositoryLayer.Services
             }
         }
 
-        //public string EncryptPassword(string password)
-        //{
-        //    try
-        //    {
-        //        if (string.IsNullOrEmpty(password))
-        //        {
-        //            return null;
-        //        }
-        //        else
-        //        {
-        //            byte[] b = Encoding.ASCII.GetBytes(password);
-        //            string encrypted = Convert.ToBase64String(b);
-        //            return encrypted;
-        //        }
-        //    }
-        //    catch (Exception)
-        //    {
+        public string EncryptPassword(string password)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(password))
+                {
+                    return null;
+                }
+                else
+                {
+                    byte[] b = Encoding.ASCII.GetBytes(password);
+                    string encrypted = Convert.ToBase64String(b);
+                    return encrypted;
+                }
+            }
+            catch (Exception)
+            {
 
-        //        throw;
-        //    }
-        //}
+                throw;
+            }
+        }
 
         //public static string DecryptedPassword(string encryptedPassword)
         //{
@@ -98,8 +98,6 @@ namespace RepositoryLayer.Services
         //    }
         //}
 
-
-
         //Validating Email And Password
         public string LoginUser(string email, string password)
         {
@@ -111,7 +109,7 @@ namespace RepositoryLayer.Services
                 {
                     return null;
                 }
-               
+
                 //Calling Jwt Token Creation method and returning token.
                 return GetJWTToken(email, result.userID);
 
@@ -121,7 +119,7 @@ namespace RepositoryLayer.Services
 
                 throw ex;
             }
-        }
+        }                 
 
         //Implementing Jwt Token For Login using Email and Id
         private static string GetJWTToken(string email, int userID)
@@ -249,8 +247,8 @@ namespace RepositoryLayer.Services
                 var user = fundooDBContext.Users.FirstOrDefault(u => u.email == email);
                 if (resetPassword.NewPassword.Equals(resetPassword.ConfirmPassword))
                 {
-                    string encryptedPassword = StringCipher.Encrypt(resetPassword.NewPassword);
-                    //user.password = EncryptPassword(resetPassword.NewPassword);
+                    //string encryptedPassword = StringCipher.Encrypt(resetPassword.NewPassword);
+                    user.password = EncryptPassword(resetPassword.NewPassword);
                     fundooDBContext.SaveChanges();
                     return true;
                 }
@@ -267,7 +265,6 @@ namespace RepositoryLayer.Services
         {
             try
             {
-                   //string decryptedString = StringCipher.Decrypt(password);
                 var result = fundooDBContext.Users.ToList();
                 return result;
             }
@@ -276,5 +273,6 @@ namespace RepositoryLayer.Services
                 throw ex;
             }
         }
+
     }
 }

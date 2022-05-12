@@ -88,7 +88,7 @@ namespace FundooNotes.Controllers
 
         [Authorize]
         [HttpPut("ChangeColour/{noteId}/{colour}")]
-        public async Task<ActionResult> ChangeColour(int noteId, string colour)
+        public async Task<ActionResult> ChangeColour(int userId, int noteId, string colour)
         {
             try
             {
@@ -101,7 +101,7 @@ namespace FundooNotes.Controllers
                     return this.BadRequest(new { success = false, message = "Sorry! Note does not exist" });
                 }
 
-                await this.noteBL.ChangeColour(UserId,noteId, colour);
+                await this.noteBL.ChangeColour(userId,noteId, colour);
                 return this.Ok(new { success = true, message = "Note Colour Changed Successfully " });
             }
             catch (Exception)
@@ -192,6 +192,28 @@ namespace FundooNotes.Controllers
                 List<Note> result = new List<Note>();
                 result = await this.noteBL.GetAllNote(userId);
                 return this.Ok(new { success = true, message = $"Below are all notes", data = result });
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        [Authorize]
+        [HttpPut("ReminderNote/{noteId}/{ReminderDate}")]
+        public async Task<ActionResult> IsReminder(int userId, int noteId, DateTime ReminderDate)
+        {
+            try
+            {
+                var userid = User.Claims.FirstOrDefault(x => x.Type.ToString().Equals("userID", StringComparison.InvariantCultureIgnoreCase));
+                int userID = Int32.Parse(userid.Value);
+                var note = fundooDBContext.Notes.FirstOrDefault(e => e.userID == userId && e.NoteId == noteId);
+                if (note == null)
+                {
+                    return this.BadRequest(new { success = false, message = "Failed to Set ReminderDate or Id does not exists" });
+                }
+                await this.noteBL.ReminderNote(userId, noteId, ReminderDate);
+                return this.Ok(new { success = true, message = "ReminderDate is set successfully!!!" });
             }
             catch (Exception ex)
             {
