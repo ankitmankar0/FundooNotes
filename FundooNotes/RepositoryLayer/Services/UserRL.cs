@@ -40,7 +40,7 @@ namespace RepositoryLayer.Services
                 user1.firstName = user.firstName;
                 user1.lastName = user.lastName;
                 user1.email = user.email;                
-                user1.password = EncryptPassword(user.password);
+                user1.password = user.password;
                 user1.registeredDate = DateTime.Now;
                 fundooDBContext.Add(user1);
                 fundooDBContext.SaveChanges();
@@ -52,27 +52,27 @@ namespace RepositoryLayer.Services
             }
         }
 
-        public string EncryptPassword(string password)
-        {
-            try
-            {
-                if (string.IsNullOrEmpty(password))
-                {
-                    return null;
-                }
-                else
-                {
-                    byte[] b = Encoding.ASCII.GetBytes(password);
-                    string encrypted = Convert.ToBase64String(b);
-                    return encrypted;
-                }
-            }
-            catch (Exception)
-            {
+        //public string EncryptPassword(string password)
+        //{
+        //    try
+        //    {
+        //        if (string.IsNullOrEmpty(password))
+        //        {
+        //            return null;
+        //        }
+        //        else
+        //        {
+        //            byte[] b = Encoding.ASCII.GetBytes(password);
+        //            string encrypted = Convert.ToBase64String(b);
+        //            return encrypted;
+        //        }
+        //    }
+        //    catch (Exception)
+        //    {
 
-                throw;
-            }
-        }
+        //        throw;
+        //    }
+        //}
 
         //public static string DecryptedPassword(string encryptedPassword)
         //{
@@ -248,7 +248,7 @@ namespace RepositoryLayer.Services
                 if (resetPassword.NewPassword.Equals(resetPassword.ConfirmPassword))
                 {
                     //string encryptedPassword = StringCipher.Encrypt(resetPassword.NewPassword);
-                    user.password = EncryptPassword(resetPassword.NewPassword);
+                    user.password = resetPassword.NewPassword;
                     fundooDBContext.SaveChanges();
                     return true;
                 }

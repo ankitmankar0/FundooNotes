@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using RepositoryLayer.Entity;
 using RepositoryLayer.FundooContext;
 using RepositoryLayer.Interface;
@@ -25,18 +26,87 @@ namespace RepositoryLayer.Services
         {
             try
             {
-                Label label = new Label();
-                label.UserId = userId;
-                label.NoteId = noteId;
+                var user = fundooDBContext.Users.FirstOrDefault(u => u.userID == userId);
+                var note = fundooDBContext.Notes.FirstOrDefault(b => b.NoteId == noteId);
+                Label label = new Label
+                {
+                    User = user,
+                    Note = note
+                };
                 label.LabelName = LabelName;
-
-                fundooDBContext.Add(label);
+                fundooDBContext.Label.Add(label);
                 await fundooDBContext.SaveChangesAsync();
             }
-            catch (Exception)
+
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public async Task<Label> UpdateLabel(int userId, int LabelId, string LabelName)
+        {
+            try
             {
 
-                throw;
+                var result = fundooDBContext.Label.FirstOrDefault(u => u.UserId == userId && u.LabelId == LabelId);
+                if (result != null)
+                {
+
+                    result.LabelName = LabelName;
+
+                    await fundooDBContext.SaveChangesAsync();
+                }
+                //return await fundooDBContext.Label.Where(u => u.UserId == userId && u.LabelId == LabelId).Include(u=>u.User).
+
+                return await fundooDBContext.Label
+                .Where(u => u.UserId == userId && u.LabelId == LabelId)
+                .Include(u => u.User)
+                .FirstOrDefaultAsync();
+            }            
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public async Task DeleteLabel(int LabelId, int userId)
+        {
+            try
+            {
+                var result = fundooDBContext.Label.FirstOrDefault(u => u.LabelId == LabelId && u.UserId == userId);
+                fundooDBContext.Label.Remove(result);
+                await fundooDBContext.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public async Task<List<Label>> GetLabelByuserId(int userId)
+        {
+            try
+            {
+                List<Label> reuslt = await fundooDBContext.Label.Where(u => u.UserId == userId).ToListAsync();
+                return reuslt;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public async Task<List<Label>> GetlabelByNoteId(int NoteId)
+        {
+            try
+            {
+                List<Label> reuslt = await fundooDBContext.Label.Where(u => u.NoteId == NoteId).Include(u => u.User).ToListAsync();
+                return reuslt;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
             }
         }
     }

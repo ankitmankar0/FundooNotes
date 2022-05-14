@@ -2,11 +2,15 @@
 using CommonLayer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Caching.Memory;
+using Newtonsoft.Json;
 using RepositoryLayer.Entity;
 using RepositoryLayer.FundooContext;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace FundooNotes.Controllers
@@ -15,12 +19,17 @@ namespace FundooNotes.Controllers
     [Route("[controller]")]
     public class NoteController : ControllerBase
     {
+        private readonly IMemoryCache memoryCache;
+        private readonly IDistributedCache distributedCache;
+
         FundooDBContext fundooDBContext;
         INoteBL noteBL;
-        public NoteController(INoteBL noteBL, FundooDBContext fundooContext)
+        public NoteController(INoteBL noteBL, FundooDBContext fundooDBContext, IMemoryCache memoryCache, IDistributedCache distributedCache)
         {
             this.noteBL = noteBL;
-            this.fundooDBContext = fundooContext;
+            this.fundooDBContext = fundooDBContext;
+            this.memoryCache = memoryCache;
+            this.distributedCache = distributedCache;
         }
 
 
@@ -187,7 +196,7 @@ namespace FundooNotes.Controllers
         {
             try
             {
-                var userid = User.Claims.FirstOrDefault(x => x.Type.ToString().Equals("userID", StringComparison.InvariantCultureIgnoreCase));
+                var userid = User.Claims.FirstOrDefault(x => x.Type.ToString().Equals("userId", StringComparison.InvariantCultureIgnoreCase));
                 int userId = Int32.Parse(userid.Value);
                 List<Note> result = new List<Note>();
                 result = await this.noteBL.GetAllNote(userId);
@@ -218,6 +227,43 @@ namespace FundooNotes.Controllers
             catch (Exception ex)
             {
                 throw ex;
+            }
+        }
+
+        [Authorize]
+        [HttpGet("getAllNotesusingRedis")]
+        public async Task<IActionResult> GetAllNotes_ByRedisCache()
+        {
+            try
+            {
+                var cacheKey = "noteList";
+                string serializedNoteList;
+                var noteList = new List<Note>();
+                var redisnoteList = await distributedCache.GetAsync(cacheKey);
+                if (redisnoteList != null)
+                {
+                    serializedNoteList = Encoding.UTF8.GetString(redisnoteList);
+                    noteList = JsonConvert.DeserializeObject<List<Note>>(serializedNoteList);
+                }
+                else
+                {
+                    var userid = User.Claims.FirstOrDefault(x => x.Type.ToString().Equals("userID", StringComparison.InvariantCultureIgnoreCase));
+                    int userID = Int32.Parse(userid.Value);
+                    // noteList = await noteBL.GetAllNote(userID);
+                    noteList = await noteBL.GetAllNote(userID);
+                    serializedNoteList = JsonConvert.SerializeObject(noteList);
+                    redisnoteList = Encoding.UTF8.GetBytes(serializedNoteList);
+
+                    var option = new DistributedCacheEntryOptions().SetSlidingExpiration(TimeSpan.FromMinutes(20)).SetAbsoluteExpiration(TimeSpan.FromHours(6));
+                    await distributedCache.SetAsync(cacheKey, redisnoteList, option);
+                }
+                return this.Ok(new { success = true, message = "Get note Successfull !!", data = noteList });
+
+            }
+            catch (Exception)
+            {
+
+                throw;
             }
         }
     }

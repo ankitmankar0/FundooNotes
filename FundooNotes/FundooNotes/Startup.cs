@@ -6,12 +6,16 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
+using Newtonsoft.Json.Serialization;
 using RepositoryLayer.FundooContext;
 using RepositoryLayer.Interface;
 using RepositoryLayer.Services;
@@ -36,6 +40,10 @@ namespace FundooNotes
         public void ConfigureServices(IServiceCollection services)  //For injecting any services we use IServiceCollection
         {
             services.AddControllers();   // Services For WebApi
+
+            services.AddMemoryCache();
+
+
             services.AddDbContext<FundooDBContext>(opts => opts.UseSqlServer(Configuration["ConnectionStrings:FundooDB"]));
             services.AddTransient<IUserBL, UserBL>();
             services.AddTransient<IUserRL, UserRL>();
@@ -92,15 +100,22 @@ namespace FundooNotes
                 };
             });
 
-            }
+
+            services.AddDistributedRedisCache(
+                options =>
+                {
+                    options.Configuration = "Localhost:6379";
+                }
+                );
+
+        }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
 
-            // IApplicationBuilder provides the mechanisms to configure an application's request pipeline.
-            //IWebHostEnvironment  provide info about web hosting env an application runnning in
+        // IApplicationBuilder provides the mechanisms to configure an application's request pipeline.
+        //IWebHostEnvironment  provide info about web hosting env an application runnning in
         {
-
             // Swagger middleware to to handle requests and responses and serve swagger-ui (HTML, JS, CSS, etc.)
             app.UseSwagger();
 
@@ -121,7 +136,7 @@ namespace FundooNotes
             app.UseRouting();   //enabling routing
 
             app.UseAuthorization();
-            
+
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();

@@ -1,4 +1,5 @@
 ﻿using BusinessLayer.Interfaces;
+using RepositoryLayer.Entity;
 using RepositoryLayer.Interface;
 using System;
 using System.Collections.Generic;
@@ -20,6 +21,54 @@ namespace BusinessLayer.Services
             try
             {
                 await this.labelRL.AddLabel(userId, noteId, LabelName);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public async Task DeleteLabel(int LabelId, int userId)
+        {
+            try
+            {
+                await this.labelRL.DeleteLabel(LabelId, userId);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public async Task<List<Label>> GetlabelByNoteId(int NoteId)
+        {
+            try
+            {
+                return await this.labelRL.GetlabelByNoteId(NoteId);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public async Task<List<Label>> GetLabelByuserId(int userId)
+        {
+            try
+            {
+                return await this.labelRL.GetlabelByNoteId(userId);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public async Task<Label> UpdateLabel(int userId, int LabelId, string LabelName)
+        {
+            try
+            {
+                return await this.labelRL.UpdateLabel(userId, LabelId, LabelName);
             }
             catch (Exception ex)
             {
