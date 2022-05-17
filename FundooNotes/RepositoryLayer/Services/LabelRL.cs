@@ -25,17 +25,33 @@ namespace RepositoryLayer.Services
         public async Task AddLabel(int userId, int noteId, string LabelName)
         {
             try
+            //{
+            //    var user = fundooDBContext.Users.FirstOrDefault(u => u.userID == userId);
+            //    var note = fundooDBContext.Notes.FirstOrDefault(b => b.NoteId == noteId);
+            //    Label label = new Label
+            //    {
+            //        User = user,
+            //        Note = note
+            //    };
+            //    label.LabelName = LabelName;
+            //    fundooDBContext.Label.Add(label);
+            //    await fundooDBContext.SaveChangesAsync();
+            //}
+
             {
-                var user = fundooDBContext.Users.FirstOrDefault(u => u.userID == userId);
-                var note = fundooDBContext.Notes.FirstOrDefault(b => b.NoteId == noteId);
-                Label label = new Label
+                // checking with the notestable db to find NoteId
+                var note = fundooDBContext.Notes.Where(x => x.NoteId == noteId).FirstOrDefault();
+                if (note != null)
                 {
-                    User = user,
-                    Note = note
-                };
-                label.LabelName = LabelName;
-                fundooDBContext.Label.Add(label);
-                await fundooDBContext.SaveChangesAsync();
+                    // Entity class Instance
+                    Label label = new Label();
+                    label.LabelName = LabelName;
+                    label.NoteId = noteId;
+                    label.UserId = userId;
+
+                    this.fundooDBContext.Label.Add(label);
+                    await fundooDBContext.SaveChangesAsync();
+                }            
             }
 
             catch (Exception ex)
@@ -88,7 +104,7 @@ namespace RepositoryLayer.Services
         {
             try
             {
-                List<Label> reuslt = await fundooDBContext.Label.Where(u => u.UserId == userId).ToListAsync();
+                List<Label> reuslt = await fundooDBContext.Label.Where(u => u.UserId == userId).Include(u => u.User).Include(u => u.Note).ToListAsync();
                 return reuslt;
             }
             catch (Exception ex)
@@ -101,7 +117,7 @@ namespace RepositoryLayer.Services
         {
             try
             {
-                List<Label> reuslt = await fundooDBContext.Label.Where(u => u.NoteId == NoteId).Include(u => u.User).ToListAsync();
+                List<Label> reuslt = await fundooDBContext.Label.Where(u => u.NoteId == NoteId).Include(u => u.User).Include(u => u.Note).ToListAsync();
                 return reuslt;
             }
             catch (Exception ex)

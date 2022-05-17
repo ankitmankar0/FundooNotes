@@ -249,8 +249,8 @@ namespace FundooNotes.Controllers
                 {
                     var userid = User.Claims.FirstOrDefault(x => x.Type.ToString().Equals("userID", StringComparison.InvariantCultureIgnoreCase));
                     int userID = Int32.Parse(userid.Value);
-                    // noteList = await noteBL.GetAllNote(userID);
                     noteList = await noteBL.GetAllNote(userID);
+     
                     serializedNoteList = JsonConvert.SerializeObject(noteList);
                     redisnoteList = Encoding.UTF8.GetBytes(serializedNoteList);
 

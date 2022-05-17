@@ -108,7 +108,7 @@ namespace FundooNotes.Controllers
                 List<RepositoryLayer.Entity.Label> list = new List<RepositoryLayer.Entity.Label>();
                 var userid = User.Claims.FirstOrDefault(x => x.Type.ToString().Equals("userID", StringComparison.InvariantCultureIgnoreCase));
                 int userID = Int32.Parse(userid.Value);
-                list = await this.labelBL.GetLabelByuserId(NoteId);
+                list = await this.labelBL.GetlabelByNoteId(NoteId);
                 if (list == null)
                 {
                     return this.BadRequest(new { success = false, message = "Failed to get label" });
