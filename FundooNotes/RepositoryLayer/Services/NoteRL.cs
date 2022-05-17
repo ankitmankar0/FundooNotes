@@ -203,7 +203,9 @@ namespace RepositoryLayer.Services
         {
             try
             {
-                return await fundooDBContext.Notes.Where(u => u.userID == userId).Include(u => u.User).ToListAsync();
+                //List<Note> notes = new List<Note>();
+                return await fundooDBContext.Notes.Where(u => u.userID == userId).Include(u => u.User).Include(l => l.labels).ToListAsync();
+                //return await fundooDBContext.Notes.Where(u => u.userID == userId).Include(u => u.User).ToListAsync();
             }
             catch (Exception ex)
             {

@@ -19,7 +19,7 @@ namespace CommonLayer
         public string lastName { get; set; }
 
         [Required]
-        [RegularExpression("^[a-z]{3,}[1-9]{1,4}[@][a-z]{4,}[.][a-z]{3,}$", ErrorMessage = "Please Enter Valid Email")]
+        //[RegularExpression("^[a-z]{3,}[1-9]{1,4}[@][a-z]{4,}[.][a-z]{3,}$", ErrorMessage = "Please Enter Valid Email")]
         public string email { get; set; }
         public DateTime registeredDate { get; set; }
 

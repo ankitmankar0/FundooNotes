@@ -56,7 +56,7 @@ namespace BusinessLayer.Services
         {
             try
             {
-                return await this.labelRL.GetlabelByNoteId(userId);
+                return await this.labelRL.GetLabelByuserId(userId);
             }
             catch (Exception ex)
             {

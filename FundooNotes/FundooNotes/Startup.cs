@@ -41,6 +41,9 @@ namespace FundooNotes
         {
             services.AddControllers();   // Services For WebApi
 
+            services.AddControllers().AddNewtonsoftJson(options =>
+            options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
+
             services.AddMemoryCache();
 
 
@@ -53,7 +56,7 @@ namespace FundooNotes
 
             services.AddTransient<ILabelBL, LabelBL>();
             services.AddTransient<ILabelRL, LabelRL>();
-
+        
 
 
             //Adding Swagger in Services Collection

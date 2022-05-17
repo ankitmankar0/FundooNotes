@@ -41,20 +41,41 @@ namespace FundooNotes.Controllers
         }
 
         //user Login
+        //[HttpPost("login/{email}/{password}")]
+        //public IActionResult LoginUser(string email, string password)
+        //{
+        //    try
+        //    {
+        //        var userdata = fundooDBContext.Users.FirstOrDefault(u => u.email == email && u.password == password); //Linq
+        //        if (userdata == null)
+        //        {
+        //            return this.BadRequest(new { success = false, message = $"Email And PassWord Is Invalid" });
+        //        }
+        //        var Check = this.userBL.LoginUser(email, password);
+
+
+        //        return this.Ok(new { success = true, message = $"Login Successfull {Check}" });
+
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        throw ex;
+        //    }
+        //}
+
         [HttpPost("login/{email}/{password}")]
-        public IActionResult LoginUser(string email, string password)
+        public ActionResult LoginUser(string email, string password)
         {
             try
             {
-                var userdata = fundooDBContext.Users.FirstOrDefault(u => u.email == email && u.password == password); //Linq
-                if (userdata == null)
+
+                string token = this.userBL.LoginUser(email, password);
+                if (token == null)
                 {
-                    return this.BadRequest(new { success = false, message = $"Email And PassWord Is Invalid" });
+                    return this.BadRequest(new { success = false, message = $"Email or Password is invalid" });
                 }
-                var Check = this.userBL.LoginUser(email, password);
+                return this.Ok(new { success = true, message = $"Token Generated is" + token });
 
-
-                return this.Ok(new { success = true, message = $"Login Successfull {Check}" });
 
             }
             catch (Exception ex)
@@ -62,6 +83,7 @@ namespace FundooNotes.Controllers
                 throw ex;
             }
         }
+
 
         //Forget Pass
         [HttpPost("ForgotPassword/{email}")]
