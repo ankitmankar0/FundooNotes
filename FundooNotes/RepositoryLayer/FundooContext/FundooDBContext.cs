@@ -8,6 +8,8 @@ namespace RepositoryLayer.FundooContext
 {
     public class FundooDBContext : DbContext
     {
+        // A DbContext instance represents a session with the database and can be used to query and save the intances of  your entities.
+        // DbContext is a combination of the Unit of Work and Repository patterns.
         public FundooDBContext(DbContextOptions options) : base(options)
         {
 
