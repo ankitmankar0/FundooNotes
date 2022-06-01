@@ -56,7 +56,18 @@ namespace FundooNotes
 
             services.AddTransient<ILabelBL, LabelBL>();
             services.AddTransient<ILabelRL, LabelRL>();
-        
+
+            //services.AddCors(options =>
+            //{
+            //    options.AddPolicy(
+            //    name: "AllowOrigin",
+            //  builder => {
+            //      builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+            //  });
+            //});
+
+            services.AddCors();
+
 
 
             //Adding Swagger in Services Collection
@@ -138,7 +149,17 @@ namespace FundooNotes
 
             app.UseRouting();   //enabling routing
 
+            app.UseCors(builder => {
+                builder.SetIsOriginAllowed(origin => true);
+                builder.AllowAnyOrigin();
+                builder.AllowAnyMethod();
+                builder.AllowAnyHeader();
+            });
+
             app.UseAuthorization();
+
+            //app.UseCors("AllowOrigin");
+
 
             app.UseEndpoints(endpoints =>
             {

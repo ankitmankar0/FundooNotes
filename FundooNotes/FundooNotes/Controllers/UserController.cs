@@ -74,7 +74,7 @@ namespace FundooNotes.Controllers
                 {
                     return this.BadRequest(new { success = false, message = $"Email or Password is invalid" });
                 }
-                return this.Ok(new { success = true, message = $"Token Generated is" + token });
+                return this.Ok(new { success = true, message = $"Token Generated is", data = token });
 
 
             }
